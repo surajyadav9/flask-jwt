@@ -59,9 +59,9 @@ db.create_all()
 #                                                 #
 ###################################################
 
-# Get all users
+# Get all users (ADMIN ACCESS ONLY)
 # Also Protect a route with jwt_required, which will kick out requests without a valid JWT present.
-@app.route('/user', methods=['GET'])
+@app.route('/user/all', methods=['GET'])
 @jwt_required()
 def get_all_users():
     # Access the identity of the current user with "get_jwt_identity"
@@ -75,15 +75,39 @@ def get_all_users():
 
     current_user = get_jwt_identity() 
 
+    fetch_user = User.query.get(current_user).serialize()
+
+    if not fetch_user['admin'] :
+        return jsonify({"msg":"Unauthorized access"}), 401
+
     data = User.query.all()
     users = [user.serialize() for user in data]
     return jsonify(users), 200
 
 
-# Get only one user
+# Get only one user (ADMIN ACCESS ONLY)
 @app.route('/user/<int:user_id>', methods=['GET'])
-def get_one_user(user_id):
+@jwt_required()
+def get_user_by_id(user_id):
+    # Check whether the current_user is admin or not
+    current_user = get_jwt_identity()
+    fetch_user = User.query.get(current_user).serialize()
+    if not fetch_user['admin'] :
+        return jsonify({"msg":"Unauthorized access"}), 401
+
     user = User.query.get(user_id)
+    if user is None:
+        return jsonify({'msg':'No user found.'}), 400
+    
+    return jsonify(user.serialize()), 200
+
+
+# Get only one user
+@app.route('/user', methods=['GET'])
+@jwt_required()
+def get_current_user():
+    current_user = get_jwt_identity()
+    user = User.query.get(current_user)
     if user is None:
         return jsonify({'msg':'No user found.'}), 400
     
@@ -99,6 +123,11 @@ def create_user():
         email = request.json['email']
         password = request.json['password']
 
+        user_exists = User.query.filter_by(email=email).first()
+
+        if user_exists:
+            return jsonify({"msg":"Account exists already. Please login"})
+
         user = User(name=name, email=email, password=password)
 
         db.session.add(user)
@@ -107,9 +136,16 @@ def create_user():
     return jsonify({'msg':'New user created.'}), 201
 
 
-# Promote user to Admin
+# Promote user to Admin (ADMIN ACCESS ONLY)
 @app.route('/user/<user_id>', methods=['PUT'])
+@jwt_required()
 def promote_user(user_id):
+    current_user = get_jwt_identity()
+    fetch_user = User.query.get(current_user).serialize()
+
+    if not fetch_user['admin'] :
+        return jsonify({"msg":"Unauthorized access"}), 401
+
     data = User.query.get(user_id)
     if data is None:
         return jsonify({'msg':'No user found.'}), 400
@@ -121,14 +157,40 @@ def promote_user(user_id):
     return jsonify(data.serialize()), 200
 
 
-# Delete user
+# Delete user (ADMIN ACCESS)
 @app.route('/user/<user_id>', methods=['DELETE'])
-def delete_user(user_id):
-    data = User.query.get(user_id)
+@jwt_required()
+def delete_user_by_id(user_id):
+    # get 'id' of current user
+    current_user = get_jwt_identity()
+
+    data = User.query.get(current_user)
+    if data is None:
+        return jsonify({"msg":"No user found"})
+
+    # Check admin access
+    if not data.serialize()['admin'] :
+        return jsonify({"msg":"Unauthorized access"}), 401
+    
     db.session.delete(data)
     db.session.commit()
 
     return redirect(url_for('get_all_users'))
+
+
+# Delete user
+@app.route('/user', methods=['DELETE'])
+@jwt_required()
+def delete_current_user():
+    current_user = get_jwt_identity()
+
+    data = User.query.get(current_user)
+    if data is None:
+        return jsonify({"msg":"No user found"})
+    db.session.delete(data)
+    db.session.commit()
+
+    return jsonify({"msg":"user deleted"})
 
 
 ###################################################

@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
+import datetime
 
 app = Flask(__name__)
 
@@ -51,6 +52,15 @@ app.app_context().push()
 # 'create_all' does not update tables if they are already in the database
 # If you change a model’s columns, use a migration library like 'Flask-Migrate' to generate migrations that update the database schema.
 db.create_all()
+
+
+@jwt.expired_token_loader
+def new_expiration_msg(jwt_header, jwt_payload):
+    return jsonify(code="kya h nahi malum", error="Chal fut"), 401
+
+@jwt.invalid_token_loader
+def invalid_access(invalid_reason):
+    return jsonify(invalid_reason=invalid_reason)
 
 
 ###################################################
@@ -118,6 +128,7 @@ def get_current_user():
 @app.route('/user', methods=['POST'])
 def create_user():
 
+    # or use request.get_json() method => returns None if nothing
     if request.is_json: 
         name = request.json['name']
         email = request.json['email']
@@ -215,9 +226,59 @@ def login():
     if not user or (user.serialize()['password'] != auth.password) :
         return jsonify({'msg':'Could not verify'}), 400
     
-    token = create_access_token(identity=user.serialize()['id'])
+    token = create_access_token(identity=user.serialize()['id'], expires_delta=datetime.timedelta(minutes=30))
 
     return jsonify(access_token=token), 200
+
+
+###################################################
+#                                                 #
+#          User Login Route                       #
+#                                                 #
+###################################################
+
+@app.route('/todo', methods=['POST', 'GET'])
+@jwt_required()
+def create_todo():
+    current_user_id = get_jwt_identity()
+    if request.method == 'POST':
+        todo = request.json['todo']
+        todo_obj = Todo(todo=todo, user_id=current_user_id)
+
+        db.session.add(todo_obj)
+        db.session.commit()
+
+        return jsonify(todo_obj.serialize())
+
+    todos = Todo.query.filter_by(user_id=current_user_id)
+    res = [todo.serialize() for todo in todos]
+
+    return jsonify(res)
+
+
+# search specific todo
+# search => 127.0.0.1:5000/todo/search?todo=walk post&user_id=2
+# request.args => ImmutableMultiDict([('todo', 'walk post'), ('user_id', '2')])
+@app.route('/todo/search/', methods=['GET']) 
+@jwt_required()
+def search_todo():
+    current_user_id = get_jwt_identity()
+    print(request.args)
+    search_todo = request.args.get("todo")
+    search_user_id = request.args.get("user_id", type=int)
+
+    todos = Todo.query.filter_by(user_id=current_user_id)
+    res = [todo.serialize() for todo in todos]
+    
+    search_res = []
+    for todo in res:
+        if todo["todo"].find(search_todo) != -1 and todo["user_id"] == search_user_id:
+            search_res.append(todo)
+    
+    if len(search_res)>=1:
+        return jsonify(search_res)
+    else:
+        return jsonify({"msg":"No todo found."})
 
 if __name__=='__main__':
     app.run(debug=True)

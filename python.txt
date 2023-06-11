@@ -1,0 +1,160 @@
+------------------------------STRING----------------------------
+greet = 'Hello'
+
+# access character from 1st index to 3rd index
+print(greet[1:4])  # "ell"
+
+----------------------------
+str1 = "Hello, world!"
+str2 = "I love Python."
+str3 = "Hello, world!"
+
+# compare str1 and str2
+print(str1 == str2)
+
+# compare str1 and str3
+print(str1 == str3)
+---------------------------
+greet = "Hello, "
+name = "Jack"
+
+# using + operator
+result = greet + name
+print(result)
+
+# Output: Hello, Jack
+--------------------------
+greet = 'Hello'
+
+# iterating through greet string
+for letter in greet:
+    print(letter)
+    
+----------------------------
+MEMBERSHIP TEST
+print('a' in 'program') # True
+print('at' not in 'battle') # False
+---------------------------
+
+find() METHOD
+message = 'Python is a fun programming language'
+
+# check the index of 'fun'
+print(message.find('fun'))  # if not found return -1 
+
+# Output: 12
+
+----------------------------
+STRING REVERSE
+txt = "Hello World"[::-1]
+print(txt)
+
+-----------------------------------------------------------LIST-------------------------------------------------------------
+REMOVE ITEM FROM LIST USING pop()
+
+# create a list of prime numbers
+prime_numbers = [2, 3, 5, 7]
+
+# remove the element at index 2
+removed_element = prime_numbers.pop(2)
+
+print('Removed Element:', removed_element)
+print('Updated List:', prime_numbers)
+
+# Output: 
+# Removed Element: 5
+# Updated List: [2, 3, 7]
+
+----------------------------------------
+SORT a list 
+
+# vowels list
+vowels = ['e', 'a', 'u', 'o', 'i']
+
+# sort the vowels
+vowels.sort(reverse=True)
+
+# print vowels
+print('Sorted list (in Descending):', vowels)
+
+---------------------------------------------
+res = sorted(list, reverse=True) # returns a sorted list
+---------------------------------------------
+
+LIST REVERSE
+# create a list of prime numbers
+prime_numbers = [2, 3, 5, 7]
+
+# reverse the order of list elements
+prime_numbers.reverse()
+
+
+print('Reversed List:', prime_numbers)
+
+# Output: Reversed List: [7, 5, 3, 2]
+-------------------------------------------------
+
+# mixed list
+prime_numbers = [2, 3, 5]
+
+# copying a list
+numbers = prime_numbers.copy()
+
+
+print('Copied List:', numbers)
+
+# Output: Copied List: [2, 3, 5]
+
+--------------------------------------------------------------DICTNARY------------------------------------------------
+my_dict = {}
+
+----------------
+GET
+marks = {'Physics':67, 'Maths':87}
+
+print(marks.get('Physics')) # if key not found returns None
+
+
+# Output: 67
+
+--------------------
+items() METHOD
+
+sales = { 'apple': 2, 'orange': 3, 'grapes': 4 }
+for (key, value) in sales.items():
+  print(key, value)
+
+#output
+apple 2
+orange 3
+grapes 4
+---------------------------------
+keys() METHOD
+
+numbers = {1: 'one', 2: 'two', 3: 'three'}
+
+# extracts the keys of the dictionary
+dictionaryKeys = numbers.keys()
+
+print(dictionaryKeys)
+
+# Output: dict_keys([1, 2, 3])
+
+------------------------------------
+
+# create a dictionary
+marks = { 'Physics': 67, 'Chemistry': 72, 'Math': 89 }
+
+element = marks.pop('Chemistry') # removes and returns specified item, if key is not found exception is raised
+
+print('Popped Marks:', element)
+
+# Output: Popped Marks: 72
+
+----------------------------------------
+marks = {'Physics':67, 'Maths':87}
+
+print(marks.values())
+
+
+# Output: dict_values([67, 87])

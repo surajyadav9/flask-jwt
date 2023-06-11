@@ -1,0 +1,11 @@
+.open database_name.db => open database
+.schema table_name     => shows table schema
+.fullschema            => shows schema of all tables in the db
+-------------------------------------------------------------------
+select * from table_name ;
+-------------------------------------------------------------------
+insert into table_name(col1, col2, ...) values('val2', val2, ...);
+-------------------------------------------------------------------
+update table_name set col1='val1', col2=val2 where search_condition;
+-------------------------------------------------------------------
+delete from todo where search_condition;

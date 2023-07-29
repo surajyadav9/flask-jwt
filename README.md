@@ -1,2 +1,2 @@
 # flask-jwt
-A small project that implements token based access using flask-jwt-extended.
+A small play project that implements token based access using flask-jwt-extended.
